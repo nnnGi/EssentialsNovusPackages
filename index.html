@@ -1,36 +1,56 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Packages | Shortcut Registry</title>
-    <!-- Added Typography plugin for Markdown styling -->
+    <!-- Tailwind with Typography for Markdown -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <!-- Added marked.js to parse Markdown text -->
+    <!-- marked.js for Markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(9, 9, 11, 0.8); backdrop-filter: blur(12px); }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #09090b; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #fcfdfe;
+        }
+        /* Royal Azure Primary Color: #0038A8 */
+        .bg-azure { background-color: #0038A8; }
+        .text-azure { color: #0038A8; }
+        .border-azure { border-color: #0038A8; }
+        
+        .nav-glass { 
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(10px); 
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 56, 168, 0.05), 0 2px 4px -1px rgba(0, 56, 168, 0.03);
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -3px rgba(0, 56, 168, 0.1);
+            border-color: #0038A8;
+        }
+        /* Markdown overrides for light mode */
+        .prose pre { background-color: #0f172a !important; }
+        .prose a { color: #0038A8; text-decoration: none; font-weight: 600; }
+        .prose a:hover { text-decoration: underline; }
     </style>
 </head>
-<body class="bg-[#09090b] text-zinc-300 min-h-screen selection:bg-indigo-500/30">
+<body class="text-slate-700 min-h-screen">
 
     <!-- Navigation -->
-    <nav class="sticky top-0 z-50 glass border-b border-white/5">
+    <nav class="sticky top-0 z-50 nav-glass">
         <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3 cursor-pointer group" onclick="showPage('home')">
-                <div class="bg-indigo-500 text-white p-1.5 rounded-lg group-hover:scale-105 transition-transform">
+                <div class="bg-azure text-white p-2 rounded-lg transition-transform group-hover:scale-105">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                 </div>
-                <span class="font-semibold text-zinc-100 tracking-tight">ShortcutRegistry</span>
+                <span class="font-bold text-slate-900 text-lg tracking-tight">ShortcutRegistry</span>
             </div>
             <div class="flex gap-4">
-                <button onclick="showPage('create')" class="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Publish Package</button>
+                <button onclick="showPage('create')" class="text-sm font-semibold text-slate-600 hover:text-azure transition-colors">Publish Package</button>
             </div>
         </div>
     </nav>
@@ -40,17 +60,18 @@
         <!-- Page: Home (Gallery) -->
         <section id="page-home">
             <div class="mb-12">
-                <h1 class="text-3xl font-bold text-zinc-100 mb-2">Packages</h1>
-                <p class="text-zinc-400 mb-8">Discover and install community-created Apple Shortcuts.</p>
+                <h1 class="text-3xl font-bold text-slate-900 mb-2">Packages</h1>
+                <p class="text-slate-500 mb-8">Discover and install community-created Apple Shortcuts.</p>
                 <div class="relative max-w-2xl">
-                    <svg class="absolute left-4 top-3.5 w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" id="searchInput" placeholder="Search packages by name or id..." class="w-full pl-12 pr-4 py-3 bg-[#18181b] border border-white/10 rounded-xl shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-zinc-200 placeholder-zinc-500 transition-all">
+                    <svg class="absolute left-4 top-3.5 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="searchInput" placeholder="Search packages by name or id..." class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-azure/20 focus:border-azure outline-none text-slate-700 transition-all">
                 </div>
             </div>
 
-            <div id="gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="col-span-full py-20 text-zinc-500 text-sm flex items-center justify-center gap-2">
-                    <svg class="animate-spin h-4 w-4 text-zinc-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <div id="gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Data injected by JS -->
+                <div id="loader" class="col-span-full py-20 text-slate-400 text-sm flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-5 w-5 text-azure" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     Connecting to registry...
                 </div>
             </div>
@@ -58,9 +79,9 @@
 
         <!-- Page: Details -->
         <section id="page-details" class="hidden">
-            <button onclick="showPage('home')" class="text-zinc-500 hover:text-zinc-300 mb-8 flex items-center gap-2 text-sm transition-colors">
+            <button onclick="showPage('home')" class="text-slate-400 hover:text-azure mb-8 flex items-center gap-2 text-sm font-medium transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Packages
+                Back to Packages
             </button>
             <div id="details-content">
                 <!-- Details injected by JS -->
@@ -70,56 +91,51 @@
         <!-- Page: Create/Update -->
         <section id="page-create" class="hidden max-w-2xl mx-auto">
             <div class="mb-8">
-                <h2 id="form-title" class="text-2xl font-bold text-zinc-100">Publish Package</h2>
-                <p class="text-zinc-400 text-sm mt-1">Add a new shortcut to the registry.</p>
+                <h2 id="form-title" class="text-2xl font-bold text-slate-900">Publish Package</h2>
+                <p class="text-slate-500 text-sm mt-1">Add a new shortcut to the community registry.</p>
             </div>
             
-            <form id="packageForm" class="space-y-6 bg-[#18181b] p-6 sm:p-8 rounded-2xl border border-white/5 shadow-xl">
+            <form id="packageForm" class="space-y-6 bg-white p-8 rounded-2xl border border-slate-200 card-shadow">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-zinc-400 mb-2">Package ID</label>
-                        <input type="text" id="f-id" required placeholder="e.g. my-shortcut" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Package ID</label>
+                        <input type="text" id="f-id" required placeholder="e.g. daily-planner" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-azure/20 focus:border-azure outline-none text-slate-700">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-zinc-400 mb-2">Display Name</label>
-                        <input type="text" id="f-name" required placeholder="Super Tool" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Display Name</label>
+                        <input type="text" id="f-name" required placeholder="Daily Planner" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-azure/20 focus:border-azure outline-none text-slate-700">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-2">Secret Key <span class="text-zinc-600 text-xs">(Required for future updates)</span></label>
-                    <input type="password" id="f-key" required placeholder="Create a secure password" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Secret Key <span class="text-slate-400 font-normal text-xs">(Required for updates)</span></label>
+                    <input type="password" id="f-key" required placeholder="Create a password" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-azure/20 focus:border-azure outline-none text-slate-700">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-2">Short Description</label>
-                    <input type="text" id="f-short" required placeholder="A one-sentence summary" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Short Description</label>
+                    <input type="text" id="f-short" required placeholder="A one-sentence summary" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-azure/20 focus:border-azure outline-none text-slate-700">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-2">Long Description (Markdown Supported)</label>
-                    <textarea id="f-long" required rows="5" placeholder="Explain what your shortcut does in detail using Markdown..." class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200 font-mono text-sm"></textarea>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Long Description (Markdown)</label>
+                    <textarea id="f-long" required rows="6" placeholder="Detailed instructions and features..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-azure/20 focus:border-azure outline-none text-slate-700 font-mono text-sm"></textarea>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-white/10 pt-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-slate-100 pt-6">
                     <div>
-                        <label class="block text-sm font-medium text-zinc-400 mb-2">Initial Version</label>
-                        <input type="text" id="f-version" required placeholder="1.0.0" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Initial Version</label>
+                        <input type="text" id="f-version" required placeholder="1.0.0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-azure/20 focus:border-azure outline-none text-slate-700">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-zinc-400 mb-2">iCloud Link</label>
-                        <input type="url" id="f-link" required placeholder="https://www.icloud.com/shortcuts/..." class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">iCloud Link</label>
+                        <input type="url" id="f-link" required placeholder="https://www.icloud.com/..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-azure/20 focus:border-azure outline-none text-slate-700">
                     </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-2">Release Notes</label>
-                    <input type="text" id="f-notes" placeholder="e.g. Initial release" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
                 </div>
 
                 <div class="pt-4 flex flex-col sm:flex-row gap-3">
-                    <button type="submit" id="btn-submit" class="w-full sm:w-auto bg-zinc-100 text-zinc-950 px-6 py-2.5 rounded-lg font-semibold hover:bg-white transition-colors">Publish Package</button>
-                    <button type="button" onclick="showPage('home')" class="w-full sm:w-auto px-6 py-2.5 text-zinc-400 hover:text-zinc-200 font-medium transition-colors">Cancel</button>
+                    <button type="submit" id="btn-submit" class="flex-1 bg-azure text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-all shadow-md">Publish Package</button>
+                    <button type="button" onclick="showPage('home')" class="flex-1 bg-slate-100 text-slate-500 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-all">Cancel</button>
                 </div>
             </form>
         </section>
