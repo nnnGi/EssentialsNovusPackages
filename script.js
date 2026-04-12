@@ -2,6 +2,47 @@ const API_URL = "https://essentialslibpackages.0xncubed.workers.dev";
 
 let allPackages = [];
 let currentAction = 'create';
+const iconCache = new Map(); // Store fetched icons to avoid redundant API calls
+
+/**
+ * Fallback Shortcut Glyph SVG Component
+ * Used if the iCloud icon fails to load
+ */
+const shortcutGlyphFallback = (classes = "w-6 h-6") => `
+    <svg class="${classes}" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="131" y="77" width="250" height="250" rx="60" fill="currentColor" fill-opacity="0.3"/>
+        <rect x="131" y="185" width="250" height="250" rx="60" fill="currentColor"/>
+    </svg>
+`;
+
+/**
+ * Extracts the iCloud ID from a URL and fetches the icon download URL
+ * @param {string} url The iCloud shortcut link
+ */
+async function getShortcutIcon(url) {
+    try {
+        const idMatch = url.match(/shortcuts\/([a-f0-9]{32})/);
+        if (!idMatch) return null;
+        const id = idMatch[1];
+
+        if (iconCache.has(id)) return iconCache.get(id);
+
+        // Fetching from the public Apple Shortcuts API
+        const response = await fetch(`https://www.icloud.com/shortcuts/api/records/${id}`);
+        if (!response.ok) return null;
+        
+        const data = await response.json();
+        const iconUrl = data.fields?.icon?.value?.downloadURL;
+        
+        if (iconUrl) {
+            iconCache.set(id, iconUrl);
+            return iconUrl;
+        }
+    } catch (e) {
+        console.error("Icon fetch error:", e);
+    }
+    return null;
+}
 
 // Initialization
 window.onload = () => {
@@ -13,7 +54,6 @@ window.onload = () => {
         await submitData();
     });
 
-    // Support browser Back/Forward navigation
     window.addEventListener('popstate', handleRouting);
 };
 
@@ -49,7 +89,7 @@ function handleRouting() {
     }
 }
 
-function renderGallery() {
+async function renderGallery() {
     const container = document.getElementById('gallery');
     const query = document.getElementById('searchInput').value.toLowerCase();
     
@@ -63,12 +103,16 @@ function renderGallery() {
         return;
     }
 
+    // Generate basic structure first
     container.innerHTML = filtered.map(p => `
         <div class="bg-white border border-slate-200 p-6 rounded-2xl cursor-pointer card-hover transition-all group" onclick="viewPackage('${p.id}')">
-            <div class="flex justify-between items-start mb-3">
-                <h3 class="font-bold text-slate-900 group-hover:text-azure transition-colors">${p.name}</h3>
+            <div class="flex justify-between items-start mb-4">
+                <div id="icon-${p.id}" class="text-azure">
+                    ${shortcutGlyphFallback("w-10 h-10")}
+                </div>
                 <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">v${p.versions[0].version}</span>
             </div>
+            <h3 class="font-bold text-slate-900 group-hover:text-azure transition-colors text-lg mb-1">${p.name}</h3>
             <p class="text-slate-500 text-sm mb-5 line-clamp-2 leading-relaxed">${p.short_desc}</p>
             <div class="flex items-center text-[11px] text-slate-400 font-mono">
                 <svg class="w-3.5 h-3.5 mr-1.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16"></path></svg>
@@ -76,9 +120,20 @@ function renderGallery() {
             </div>
         </div>
     `).join('');
+
+    // Lazily load icons from Apple API
+    filtered.forEach(async (p) => {
+        const iconUrl = await getShortcutIcon(p.versions[0].link);
+        if (iconUrl) {
+            const iconContainer = document.getElementById(`icon-${p.id}`);
+            if (iconContainer) {
+                iconContainer.innerHTML = `<img src="${iconUrl}" class="w-10 h-10 rounded-xl shadow-sm" alt="icon">`;
+            }
+        }
+    });
 }
 
-function viewPackage(id, pushHistory = true) {
+async function viewPackage(id, pushHistory = true) {
     const p = allPackages.find(x => x.id === id);
     if (!p) return;
 
@@ -95,9 +150,9 @@ function viewPackage(id, pushHistory = true) {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white border border-slate-200 p-8 rounded-2xl card-shadow">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="bg-azure text-white p-2 rounded-xl">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    <div class="flex items-center gap-4 mb-8">
+                        <div id="detail-icon" class="bg-azure text-white p-1 rounded-2xl shadow-lg shadow-azure/20">
+                            ${shortcutGlyphFallback("w-12 h-12")}
                         </div>
                         <div>
                             <h1 class="text-3xl font-bold text-slate-900 leading-tight">${p.name}</h1>
@@ -112,7 +167,6 @@ function viewPackage(id, pushHistory = true) {
             </div>
 
             <div class="space-y-6">
-                <!-- Main Action -->
                 <div class="bg-white border-2 border-azure p-6 rounded-2xl shadow-lg shadow-azure/5">
                     <h3 class="text-xs font-bold text-azure uppercase tracking-widest mb-4 text-center">Latest Release</h3>
                     <a href="${latest.link}" target="_blank" class="block w-full text-center bg-azure text-white py-3 rounded-xl font-bold hover:opacity-90 transition-all mb-3">
@@ -121,7 +175,6 @@ function viewPackage(id, pushHistory = true) {
                     <p class="text-[10px] text-slate-400 text-center uppercase font-bold tracking-tighter">v${latest.version} • iCloud Link</p>
                 </div>
 
-                <!-- Versions -->
                 <div class="bg-white border border-slate-200 p-6 rounded-2xl card-shadow">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Releases</h3>
                     <div class="space-y-6">
@@ -144,6 +197,17 @@ function viewPackage(id, pushHistory = true) {
             </div>
         </div>
     `;
+
+    // Fetch icon for details page
+    const iconUrl = await getShortcutIcon(latest.link);
+    if (iconUrl) {
+        const iconDiv = document.getElementById('detail-icon');
+        if (iconDiv) {
+            iconDiv.innerHTML = `<img src="${iconUrl}" class="w-12 h-12 rounded-xl" alt="icon">`;
+            iconDiv.classList.remove('p-1'); // Remove padding once we have the full image
+        }
+    }
+
     showPage('details', false);
 }
 
