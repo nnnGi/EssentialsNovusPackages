@@ -27,7 +27,6 @@ async function getShortcutIcon(url) {
 
         if (iconCache.has(id)) return iconCache.get(id);
 
-        // Fetching from the public Apple Shortcuts API
         const response = await fetch(`https://www.icloud.com/shortcuts/api/records/${id}`);
         if (!response.ok) return null;
         
@@ -103,7 +102,6 @@ async function renderGallery() {
         return;
     }
 
-    // Generate basic structure first
     container.innerHTML = filtered.map(p => `
         <div class="bg-white border border-slate-200 p-6 rounded-2xl cursor-pointer card-hover transition-all group" onclick="viewPackage('${p.id}')">
             <div class="flex justify-between items-start mb-4">
@@ -121,7 +119,6 @@ async function renderGallery() {
         </div>
     `).join('');
 
-    // Lazily load icons from Apple API
     filtered.forEach(async (p) => {
         const iconUrl = await getShortcutIcon(p.versions[0].link);
         if (iconUrl) {
@@ -198,13 +195,12 @@ async function viewPackage(id, pushHistory = true) {
         </div>
     `;
 
-    // Fetch icon for details page
     const iconUrl = await getShortcutIcon(latest.link);
     if (iconUrl) {
         const iconDiv = document.getElementById('detail-icon');
         if (iconDiv) {
             iconDiv.innerHTML = `<img src="${iconUrl}" class="w-12 h-12 rounded-xl" alt="icon">`;
-            iconDiv.classList.remove('p-1'); // Remove padding once we have the full image
+            iconDiv.classList.remove('p-1');
         }
     }
 
@@ -213,6 +209,8 @@ async function viewPackage(id, pushHistory = true) {
 
 function prepareUpdate(id) {
     const p = allPackages.find(x => x.id === id);
+    if (!p) return;
+    
     currentAction = 'update';
     showPage('create');
     
@@ -225,6 +223,11 @@ function prepareUpdate(id) {
     document.getElementById('f-name').value = p.name;
     document.getElementById('f-short').value = p.short_desc;
     document.getElementById('f-long').value = p.long_desc;
+    
+    // Clear release-specific fields for the update
+    document.getElementById('f-version').value = '';
+    document.getElementById('f-link').value = '';
+    document.getElementById('f-notes').value = '';
     
     document.getElementById('btn-submit').innerText = "Push Update";
 }
@@ -245,7 +248,7 @@ async function submitData() {
         long_desc: document.getElementById('f-long').value,
         version: document.getElementById('f-version').value,
         link: document.getElementById('f-link').value,
-        notes: document.getElementById('f-notes').value
+        notes: document.getElementById('f-notes').value // This is the field that was missing
     };
 
     try {
