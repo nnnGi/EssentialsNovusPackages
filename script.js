@@ -6,7 +6,6 @@ const iconCache = new Map(); // Store fetched icons to avoid redundant API calls
 
 /**
  * Fallback Shortcut Glyph SVG Component
- * Used if the iCloud icon fails to load
  */
 const shortcutGlyphFallback = (classes = "w-6 h-6") => `
     <svg class="${classes}" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -17,7 +16,6 @@ const shortcutGlyphFallback = (classes = "w-6 h-6") => `
 
 /**
  * Extracts the iCloud ID from a URL and fetches the icon download URL
- * @param {string} url The iCloud shortcut link
  */
 async function getShortcutIcon(url) {
     try {
@@ -63,11 +61,14 @@ async function fetchRegistry() {
         allPackages = await res.json();
         handleRouting();
     } catch (e) {
-        document.getElementById('gallery').innerHTML = `
-            <div class="col-span-full text-center py-20 bg-red-50 text-red-700 rounded-2xl border border-red-100">
-                <p class="font-bold">Registry Connection Error</p>
-                <p class="text-xs mt-1">Check your API_URL and Worker status.</p>
-            </div>`;
+        const gallery = document.getElementById('gallery');
+        if (gallery) {
+            gallery.innerHTML = `
+                <div class="col-span-full text-center py-20 bg-red-50 text-red-700 rounded-2xl border border-red-100">
+                    <p class="font-bold">Registry Connection Error</p>
+                    <p class="text-xs mt-1">Check your API_URL and Worker status.</p>
+                </div>`;
+        }
     }
 }
 
@@ -90,6 +91,8 @@ function handleRouting() {
 
 async function renderGallery() {
     const container = document.getElementById('gallery');
+    if (!container) return;
+    
     const query = document.getElementById('searchInput').value.toLowerCase();
     
     const filtered = allPackages.filter(p => 
@@ -143,7 +146,10 @@ async function viewPackage(id, pushHistory = true) {
     const latest = p.versions[0];
     const parsedMarkdown = marked.parse(p.long_desc || '*No description provided.*');
     
-    document.getElementById('details-content').innerHTML = `
+    const detailsContainer = document.getElementById('details-content');
+    if (!detailsContainer) return;
+
+    detailsContainer.innerHTML = `
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white border border-slate-200 p-8 rounded-2xl card-shadow">
@@ -224,10 +230,11 @@ function prepareUpdate(id) {
     document.getElementById('f-short').value = p.short_desc;
     document.getElementById('f-long').value = p.long_desc;
     
-    // Clear release-specific fields for the update
     document.getElementById('f-version').value = '';
     document.getElementById('f-link').value = '';
-    document.getElementById('f-notes').value = '';
+    
+    const notesField = document.getElementById('f-notes');
+    if (notesField) notesField.value = '';
     
     document.getElementById('btn-submit').innerText = "Push Update";
 }
@@ -239,6 +246,10 @@ async function submitData() {
     btn.innerText = "Processing...";
     btn.disabled = true;
 
+    // Fixed null check for f-notes
+    const notesEl = document.getElementById('f-notes');
+    const notesVal = notesEl ? notesEl.value : "";
+
     const payload = {
         action: currentAction,
         id: document.getElementById('f-id').value,
@@ -248,7 +259,7 @@ async function submitData() {
         long_desc: document.getElementById('f-long').value,
         version: document.getElementById('f-version').value,
         link: document.getElementById('f-link').value,
-        notes: document.getElementById('f-notes').value // This is the field that was missing
+        notes: notesVal
     };
 
     try {
@@ -275,14 +286,20 @@ async function submitData() {
 
 function showPage(pageId, pushHistory = true) {
     document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-    document.getElementById('page-' + pageId).classList.remove('hidden');
+    const targetPage = document.getElementById('page-' + pageId);
+    if (targetPage) targetPage.classList.remove('hidden');
     
     if (pageId === 'home') {
         currentAction = 'create';
-        document.getElementById('packageForm').reset();
+        const form = document.getElementById('packageForm');
+        if (form) form.reset();
+        
         const idField = document.getElementById('f-id');
-        idField.disabled = false;
-        idField.classList.remove('opacity-50', 'bg-slate-100');
+        if (idField) {
+            idField.disabled = false;
+            idField.classList.remove('opacity-50', 'bg-slate-100');
+        }
+        
         document.getElementById('form-title').innerText = "Publish Package";
         document.getElementById('btn-submit').innerText = "Publish Package";
         
