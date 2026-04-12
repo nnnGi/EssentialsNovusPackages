@@ -83,22 +83,41 @@ async function viewPackage(id, pushHistory = true) {
                 </div>
                 <div class="prose prose-slate max-w-none">${marked.parse(p.long_desc)}</div>
             </div>
+            
             <div class="space-y-4">
                 <div class="bg-white p-6 rounded-2xl border-2 border-azure text-center">
-                    <a href="${latest.link}" target="_blank" class="block w-full bg-azure text-white py-3 rounded-xl font-bold mb-2">Install Shortcut</a>
-                    <span class="text-xs font-bold text-slate-400 uppercase">Latest: v${latest.version}</span>
+                    <a href="${latest.link}" target="_blank" class="block w-full bg-azure text-white py-3 rounded-xl font-bold mb-2 hover:opacity-90 transition-opacity">Install Latest</a>
+                    <span class="text-xs font-bold text-slate-400 uppercase">Version v${latest.version}</span>
                 </div>
+
                 <div class="bg-white p-6 rounded-2xl border border-slate-200">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase mb-4">History</h3>
-                    <div class="space-y-4">
-                        ${p.versions.map(v => `<div class="text-sm border-l-2 border-slate-100 pl-3"><strong>v${v.version}</strong><p class="text-slate-500 text-xs">${v.notes || ''}</p></div>`).join('')}
+                    <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-widest">Version History</h3>
+                    <div class="space-y-6">
+                        ${p.versions.map(v => `
+                            <div class="relative pl-4 border-l-2 border-slate-100 group">
+                                <div class="flex justify-between items-start mb-1">
+                                    <strong class="text-sm text-slate-900">v${v.version}</strong>
+                                    <a href="${v.link}" target="_blank" title="Install v${v.version}" class="text-azure hover:text-blue-700 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                                <p class="text-slate-500 text-xs leading-relaxed">${v.notes || 'No release notes.'}</p>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
-                <button onclick="prepareUpdate('${p.id}', 'update')" class="w-full py-3 bg-azure/5 text-azure font-bold rounded-xl border border-azure/20 text-xs uppercase">New Version</button>
-                <button onclick="prepareUpdate('${p.id}', 'edit')" class="w-full py-3 text-slate-400 font-bold rounded-xl border border-dashed border-slate-200 text-xs uppercase">Edit Metadata</button>
+
+                <div class="grid grid-cols-1 gap-2 pt-2">
+                    <button onclick="prepareUpdate('${p.id}', 'update')" class="w-full py-3 bg-azure/5 text-azure font-bold rounded-xl border border-azure/20 text-xs uppercase hover:bg-azure/10 transition-colors">New Version</button>
+                    <button onclick="prepareUpdate('${p.id}', 'edit')" class="w-full py-3 text-slate-400 font-bold rounded-xl border border-dashed border-slate-200 text-xs uppercase hover:bg-slate-50 transition-colors">Edit Metadata</button>
+                </div>
             </div>
         </div>
     `;
+    
+    // Icon loading logic remains the same
     const icon = await getShortcutIcon(latest.link);
     if (icon) document.getElementById('detail-icon').innerHTML = `<img src="${icon}" class="w-12 h-12 rounded-xl">`;
     showPage('details', false);
