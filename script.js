@@ -67,6 +67,7 @@ function renderGallery() {
         if (url) document.getElementById(`icon-${p.id}`).innerHTML = `<img src="${url}" class="w-10 h-10 rounded-xl">`;
     });
 }
+
 async function viewPackage(id, pushHistory = true) {
     const p = allPackages.find(x => x.id === id);
     if (!p) return;
@@ -103,20 +104,22 @@ async function viewPackage(id, pushHistory = true) {
                 <!-- Version History with individual links -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-widest">Version History</h3>
-                    <div class="space-y-5">
+                    <div class="flex flex-col gap-5">
                         ${p.versions.map(v => `
-                            <div class="relative pl-4 border-l-2 border-slate-100 py-1">
-                                <div class="flex justify-between items-center mb-1">
-                                    <strong class="text-sm text-slate-800">v${v.version}</strong>
-                                    <!-- The individual install button -->
-                                    <a href="${v.link}" target="_blank" class="flex items-center gap-1.5 text-azure hover:text-blue-700 bg-azure/5 hover:bg-azure/10 px-2 py-1 rounded-md transition-all">
-                                        <span class="text-[10px] font-bold uppercase">Link</span>
+                            <div class="relative pl-4 border-l-2 border-slate-100 py-1 flex flex-col gap-2">
+                                <div class="flex justify-between items-center w-full">
+                                    <span class="text-sm font-bold text-slate-800">v${v.version}</span>
+                                    
+                                    <!-- Visible Link Button -->
+                                    <a href="${v.link}" target="_blank" 
+                                       class="inline-flex items-center gap-2 bg-slate-100 hover:bg-azure hover:text-white text-slate-600 px-3 py-1.5 rounded-lg transition-all duration-200">
+                                        <span class="text-[10px] font-bold uppercase tracking-tight">Get Link</span>
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                         </svg>
                                     </a>
                                 </div>
-                                <p class="text-slate-500 text-xs leading-relaxed pr-2">${v.notes || 'No notes.'}</p>
+                                ${v.notes ? `<p class="text-slate-500 text-xs leading-relaxed pr-2">${v.notes}</p>` : ''}
                             </div>
                         `).join('')}
                     </div>
