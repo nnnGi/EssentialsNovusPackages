@@ -1,10 +1,9 @@
-
 const API_URL = "https://essentialslibpackages.0xncubed.workers.dev";
 
 let allPackages = [];
 let currentAction = 'create';
 
-// Initialize
+// Initialization
 window.onload = () => {
     fetchRegistry();
     
@@ -14,7 +13,7 @@ window.onload = () => {
         await submitData();
     });
 
-    // Listen to browser Back/Forward navigation to handle routing
+    // Support browser Back/Forward navigation
     window.addEventListener('popstate', handleRouting);
 };
 
@@ -23,26 +22,24 @@ async function fetchRegistry() {
         const res = await fetch(API_URL);
         if (!res.ok) throw new Error("Registry Error");
         allPackages = await res.json();
-        
-        // Let the router decide what to show based on the URL on first load
         handleRouting();
     } catch (e) {
         document.getElementById('gallery').innerHTML = `
-            <div class="col-span-full text-center py-20 text-red-400/80 bg-red-400/10 rounded-xl border border-red-400/20">
-                Failed to load registry. Have you set up your API_URL yet?
+            <div class="col-span-full text-center py-20 bg-red-50 text-red-700 rounded-2xl border border-red-100">
+                <p class="font-bold">Registry Connection Error</p>
+                <p class="text-xs mt-1">Check your API_URL and Worker status.</p>
             </div>`;
     }
 }
 
-// Router to handle ?id= links
 function handleRouting() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const packageId = urlParams.get('id');
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
     
-    if (packageId && allPackages.length > 0) {
-        const exists = allPackages.find(p => p.id === packageId);
-        if (exists) {
-            viewPackage(packageId, false); // False means don't push history again
+    if (id && allPackages.length > 0) {
+        const pkg = allPackages.find(p => p.id === id);
+        if (pkg) {
+            viewPackage(id, false);
         } else {
             showPage('home', false);
         }
@@ -53,8 +50,8 @@ function handleRouting() {
 }
 
 function renderGallery() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
     const container = document.getElementById('gallery');
+    const query = document.getElementById('searchInput').value.toLowerCase();
     
     const filtered = allPackages.filter(p => 
         p.name.toLowerCase().includes(query) || 
@@ -62,19 +59,19 @@ function renderGallery() {
     );
 
     if (filtered.length === 0) {
-        container.innerHTML = `<div class="col-span-full text-center py-20 text-zinc-500 text-sm">No packages match your search.</div>`;
+        container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400 text-sm">No packages match your search.</div>`;
         return;
     }
 
     container.innerHTML = filtered.map(p => `
-        <div class="bg-[#18181b] border border-white/5 p-5 rounded-2xl cursor-pointer hover:border-indigo-500/50 hover:bg-[#1f1f22] transition-all group" onclick="viewPackage('${p.id}')">
+        <div class="bg-white border border-slate-200 p-6 rounded-2xl cursor-pointer card-hover transition-all group" onclick="viewPackage('${p.id}')">
             <div class="flex justify-between items-start mb-3">
-                <h3 class="font-semibold text-zinc-100 group-hover:text-indigo-400 transition-colors">${p.name}</h3>
-                <span class="text-[10px] bg-white/10 text-zinc-300 px-2 py-0.5 rounded-full font-mono border border-white/5">v${p.versions[0].version}</span>
+                <h3 class="font-bold text-slate-900 group-hover:text-azure transition-colors">${p.name}</h3>
+                <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">v${p.versions[0].version}</span>
             </div>
-            <p class="text-zinc-400 text-sm mb-4 line-clamp-2 leading-relaxed">${p.short_desc}</p>
-            <div class="flex items-center text-xs text-zinc-500 font-mono">
-                <svg class="w-3.5 h-3.5 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+            <p class="text-slate-500 text-sm mb-5 line-clamp-2 leading-relaxed">${p.short_desc}</p>
+            <div class="flex items-center text-[11px] text-slate-400 font-mono">
+                <svg class="w-3.5 h-3.5 mr-1.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16"></path></svg>
                 ${p.id}
             </div>
         </div>
@@ -85,7 +82,6 @@ function viewPackage(id, pushHistory = true) {
     const p = allPackages.find(x => x.id === id);
     if (!p) return;
 
-    // Update the URL so it can be copied and shared
     if (pushHistory) {
         const url = new URL(window.location);
         url.searchParams.set('id', id);
@@ -93,67 +89,62 @@ function viewPackage(id, pushHistory = true) {
     }
 
     const latest = p.versions[0];
-    
-    // Parse Markdown safely
-    const parsedMarkdown = marked.parse(p.long_desc || 'No description provided.');
+    const parsedMarkdown = marked.parse(p.long_desc || '*No description provided.*');
     
     document.getElementById('details-content').innerHTML = `
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <div class="lg:col-span-2 space-y-8">
-                <div class="pb-6 border-b border-white/10">
-                    <div class="flex items-center gap-3 mb-2">
-                        <h1 class="text-3xl font-bold text-zinc-100">${p.name}</h1>
-                        <span class="text-xs bg-indigo-500/10 text-indigo-400 px-2.5 py-1 rounded-full font-mono border border-indigo-500/20">v${latest.version}</span>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white border border-slate-200 p-8 rounded-2xl card-shadow">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="bg-azure text-white p-2 rounded-xl">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-bold text-slate-900 leading-tight">${p.name}</h1>
+                            <p class="text-sm font-mono text-slate-400">${p.id}</p>
+                        </div>
                     </div>
-                    <p class="text-zinc-500 font-mono text-sm flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                        ${p.id}
-                    </p>
-                </div>
-                
-                <div>
-                    <h2 class="text-sm font-semibold text-zinc-100 uppercase tracking-wider mb-4">Readme</h2>
-                    <!-- Markdown styling is applied here via "prose" classes -->
-                    <div class="prose prose-invert prose-indigo max-w-none text-zinc-300 leading-relaxed bg-[#18181b] p-6 sm:p-8 rounded-2xl border border-white/5 overflow-x-auto">
+                    
+                    <div class="prose prose-slate max-w-none">
                         ${parsedMarkdown}
                     </div>
                 </div>
             </div>
 
             <div class="space-y-6">
-                <div class="bg-[#18181b] p-6 rounded-2xl border border-white/5">
-                    <h2 class="text-sm font-semibold text-zinc-100 uppercase tracking-wider mb-4">Install</h2>
-                    <a href="${latest.link}" target="_blank" class="block w-full text-center bg-zinc-100 text-zinc-950 py-2.5 rounded-lg font-semibold hover:bg-white transition-colors mb-3">
-                        Get Shortcut
+                <!-- Main Action -->
+                <div class="bg-white border-2 border-azure p-6 rounded-2xl shadow-lg shadow-azure/5">
+                    <h3 class="text-xs font-bold text-azure uppercase tracking-widest mb-4 text-center">Latest Release</h3>
+                    <a href="${latest.link}" target="_blank" class="block w-full text-center bg-azure text-white py-3 rounded-xl font-bold hover:opacity-90 transition-all mb-3">
+                        Install Shortcut
                     </a>
-                    <p class="text-xs text-zinc-500 text-center">Requires Apple Shortcuts app</p>
+                    <p class="text-[10px] text-slate-400 text-center uppercase font-bold tracking-tighter">v${latest.version} • iCloud Link</p>
                 </div>
 
-                <div class="bg-[#18181b] p-6 rounded-2xl border border-white/5">
-                    <h2 class="text-sm font-semibold text-zinc-100 uppercase tracking-wider mb-4">Releases</h2>
-                    <div class="space-y-4">
+                <!-- Versions -->
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl card-shadow">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Releases</h3>
+                    <div class="space-y-6">
                         ${p.versions.map((v, i) => `
-                            <div class="relative pl-5 border-l border-white/10">
-                                <div class="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full ${i === 0 ? 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]' : 'bg-zinc-700'}"></div>
-                                <div class="flex justify-between items-baseline mb-1">
-                                    <div class="font-mono text-sm text-zinc-200">v${v.version}</div>
-                                    <a href="${v.link}" class="text-xs text-indigo-400 hover:text-indigo-300">Link</a>
+                            <div class="relative pl-5 border-l-2 ${i === 0 ? 'border-azure' : 'border-slate-100'}">
+                                <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full ${i === 0 ? 'bg-azure' : 'bg-slate-200'}"></div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-bold text-slate-800 text-sm">v${v.version}</span>
+                                    <a href="${v.link}" class="text-[10px] font-bold text-azure hover:underline uppercase">Link</a>
                                 </div>
-                                <div class="text-xs text-zinc-500">${v.notes || 'No release notes.'}</div>
+                                <p class="text-xs text-slate-500 leading-relaxed">${v.notes || 'Initial release.'}</p>
                             </div>
                         `).join('')}
                     </div>
                 </div>
 
-                <div class="pt-4 border-t border-white/5">
-                    <button onclick="prepareUpdate('${p.id}')" class="w-full border border-white/10 text-zinc-400 py-2 rounded-lg text-sm font-medium hover:bg-white/5 hover:text-zinc-200 transition-colors">
-                        Maintainer: Push Update
-                    </button>
-                </div>
+                <button onclick="prepareUpdate('${p.id}')" class="w-full py-3 text-slate-400 hover:text-azure font-bold text-xs uppercase tracking-widest transition-colors border border-dashed border-slate-200 rounded-xl hover:bg-azure/5">
+                    Maintainer: Push Update
+                </button>
             </div>
         </div>
     `;
-    showPage('details', false); // Let viewPackage handle the history
+    showPage('details', false);
 }
 
 function prepareUpdate(id) {
@@ -161,18 +152,17 @@ function prepareUpdate(id) {
     currentAction = 'update';
     showPage('create');
     
-    document.getElementById('form-title').innerText = `Update Package: ${p.name}`;
-    
-    document.getElementById('f-id').value = p.id;
-    document.getElementById('f-id').disabled = true;
-    document.getElementById('f-id').classList.add('opacity-50', 'cursor-not-allowed');
+    document.getElementById('form-title').innerText = `Update: ${p.name}`;
+    const idField = document.getElementById('f-id');
+    idField.value = p.id;
+    idField.disabled = true;
+    idField.classList.add('opacity-50', 'bg-slate-100');
     
     document.getElementById('f-name').value = p.name;
     document.getElementById('f-short').value = p.short_desc;
     document.getElementById('f-long').value = p.long_desc;
     
-    const btn = document.getElementById('btn-submit');
-    btn.innerText = "Push Update";
+    document.getElementById('btn-submit').innerText = "Push Update";
 }
 
 async function submitData() {
@@ -181,7 +171,6 @@ async function submitData() {
     
     btn.innerText = "Processing...";
     btn.disabled = true;
-    btn.classList.add('opacity-75', 'cursor-not-allowed');
 
     const payload = {
         action: currentAction,
@@ -203,19 +192,17 @@ async function submitData() {
         });
 
         if (res.ok) {
-            alert("Success! Your package has been updated.");
-            // Reload and clear ID param to return to home
+            alert("Success!");
             window.location.href = window.location.pathname;
         } else {
-            const errorText = await res.text();
-            alert("Error: " + errorText);
+            const errText = await res.text();
+            alert("Error: " + errText);
         }
     } catch (e) {
-        alert("Failed to connect to the server. Check your internet or API URL.");
+        alert("Connection failed.");
     } finally {
         btn.innerText = originalText;
         btn.disabled = false;
-        btn.classList.remove('opacity-75', 'cursor-not-allowed');
     }
 }
 
@@ -226,12 +213,12 @@ function showPage(pageId, pushHistory = true) {
     if (pageId === 'home') {
         currentAction = 'create';
         document.getElementById('packageForm').reset();
-        document.getElementById('f-id').disabled = false;
-        document.getElementById('f-id').classList.remove('opacity-50', 'cursor-not-allowed');
+        const idField = document.getElementById('f-id');
+        idField.disabled = false;
+        idField.classList.remove('opacity-50', 'bg-slate-100');
         document.getElementById('form-title').innerText = "Publish Package";
         document.getElementById('btn-submit').innerText = "Publish Package";
         
-        // Clear the ?id= from URL when going back to home
         if (pushHistory) {
             const url = new URL(window.location);
             url.searchParams.delete('id');
@@ -239,5 +226,5 @@ function showPage(pageId, pushHistory = true) {
             renderGallery();
         }
     }
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
