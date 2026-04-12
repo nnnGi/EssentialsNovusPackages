@@ -1,112 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shortcut Index | The Shortcut Registry</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- We link the external script at the end of the body -->
+    <title>Packages | Shortcut Registry</title>
+    <!-- Added Typography plugin for Markdown styling -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <!-- Added marked.js to parse Markdown text -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
-        .card:hover { transform: translateY(-2px); transition: all 0.2s; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(9, 9, 11, 0.8); backdrop-filter: blur(12px); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen">
+<body class="bg-[#09090b] text-zinc-300 min-h-screen selection:bg-indigo-500/30">
 
     <!-- Navigation -->
-    <nav class="sticky top-0 z-50 glass border-b border-slate-200">
-        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2 font-bold text-xl cursor-pointer" onclick="showPage('home')">
-                <span class="bg-blue-600 text-white p-1 rounded">📦</span>
-                <span>ShortcutIndex</span>
+    <nav class="sticky top-0 z-50 glass border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="showPage('home')">
+                <div class="bg-indigo-500 text-white p-1.5 rounded-lg group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                </div>
+                <span class="font-semibold text-zinc-100 tracking-tight">ShortcutRegistry</span>
             </div>
             <div class="flex gap-4">
-                <button onclick="showPage('create')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition">Publish Shortcut</button>
+                <button onclick="showPage('create')" class="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Publish Package</button>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-5xl mx-auto px-4 py-8">
+    <main class="max-w-6xl mx-auto px-6 py-12">
         
         <!-- Page: Home (Gallery) -->
         <section id="page-home">
-            <div class="mb-12 text-center">
-                <h1 class="text-4xl font-extrabold mb-4">Find, install, and publish shortcuts.</h1>
-                <input type="text" id="searchInput" placeholder="Search packages..." class="w-full max-w-xl px-6 py-4 rounded-2xl border border-slate-200 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none text-lg">
+            <div class="mb-12">
+                <h1 class="text-3xl font-bold text-zinc-100 mb-2">Packages</h1>
+                <p class="text-zinc-400 mb-8">Discover and install community-created Apple Shortcuts.</p>
+                <div class="relative max-w-2xl">
+                    <svg class="absolute left-4 top-3.5 w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="searchInput" placeholder="Search packages by name or id..." class="w-full pl-12 pr-4 py-3 bg-[#18181b] border border-white/10 rounded-xl shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-zinc-200 placeholder-zinc-500 transition-all">
+                </div>
             </div>
 
-            <div id="gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="col-span-full text-center py-20 text-slate-400 italic">Connecting to registry...</div>
+            <div id="gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="col-span-full py-20 text-zinc-500 text-sm flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-4 w-4 text-zinc-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Connecting to registry...
+                </div>
             </div>
         </section>
 
         <!-- Page: Details -->
         <section id="page-details" class="hidden">
-            <button onclick="showPage('home')" class="text-blue-600 mb-4 flex items-center gap-1 font-medium">← Back to Gallery</button>
-            <div id="details-content" class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+            <button onclick="showPage('home')" class="text-zinc-500 hover:text-zinc-300 mb-8 flex items-center gap-2 text-sm transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Packages
+            </button>
+            <div id="details-content">
                 <!-- Details injected by JS -->
             </div>
         </section>
 
         <!-- Page: Create/Update -->
         <section id="page-create" class="hidden max-w-2xl mx-auto">
-            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                <h2 id="form-title" class="text-2xl font-bold mb-6">Publish New Package</h2>
-                
-                <form id="packageForm" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Package ID (unique-slug)</label>
-                            <input type="text" id="f-id" required placeholder="my-awesome-tool" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Display Name</label>
-                            <input type="text" id="f-name" required placeholder="Super Tool" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Secret Key (To edit later)</label>
-                        <input type="password" id="f-key" required placeholder="Keep this safe!" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Short Description</label>
-                        <input type="text" id="f-short" required placeholder="A one-sentence summary" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Long Description</label>
-                        <textarea id="f-long" required rows="4" placeholder="Explain what your shortcut does..." class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 border-t pt-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Version</label>
-                            <input type="text" id="f-version" required placeholder="1.0.0" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">iCloud Link</label>
-                            <input type="url" id="f-link" required placeholder="https://icloud.com/..." class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Release Notes</label>
-                        <input type="text" id="f-notes" placeholder="What changed?" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-
-                    <div class="pt-4 flex flex-col gap-2">
-                        <button type="submit" id="btn-submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">Publish to Registry</button>
-                        <button type="button" onclick="showPage('home')" class="w-full text-slate-500 py-2">Cancel</button>
-                    </div>
-                </form>
+            <div class="mb-8">
+                <h2 id="form-title" class="text-2xl font-bold text-zinc-100">Publish Package</h2>
+                <p class="text-zinc-400 text-sm mt-1">Add a new shortcut to the registry.</p>
             </div>
+            
+            <form id="packageForm" class="space-y-6 bg-[#18181b] p-6 sm:p-8 rounded-2xl border border-white/5 shadow-xl">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Package ID</label>
+                        <input type="text" id="f-id" required placeholder="e.g. my-shortcut" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Display Name</label>
+                        <input type="text" id="f-name" required placeholder="Super Tool" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Secret Key <span class="text-zinc-600 text-xs">(Required for future updates)</span></label>
+                    <input type="password" id="f-key" required placeholder="Create a secure password" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Short Description</label>
+                    <input type="text" id="f-short" required placeholder="A one-sentence summary" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Long Description (Markdown Supported)</label>
+                    <textarea id="f-long" required rows="5" placeholder="Explain what your shortcut does in detail using Markdown..." class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200 font-mono text-sm"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-white/10 pt-6">
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Initial Version</label>
+                        <input type="text" id="f-version" required placeholder="1.0.0" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">iCloud Link</label>
+                        <input type="url" id="f-link" required placeholder="https://www.icloud.com/shortcuts/..." class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Release Notes</label>
+                    <input type="text" id="f-notes" placeholder="e.g. Initial release" class="w-full p-2.5 bg-[#09090b] border border-white/10 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none text-zinc-200">
+                </div>
+
+                <div class="pt-4 flex flex-col sm:flex-row gap-3">
+                    <button type="submit" id="btn-submit" class="w-full sm:w-auto bg-zinc-100 text-zinc-950 px-6 py-2.5 rounded-lg font-semibold hover:bg-white transition-colors">Publish Package</button>
+                    <button type="button" onclick="showPage('home')" class="w-full sm:w-auto px-6 py-2.5 text-zinc-400 hover:text-zinc-200 font-medium transition-colors">Cancel</button>
+                </div>
+            </form>
         </section>
 
     </main>
 
-    <!-- Project Logic -->
     <script src="script.js"></script>
 </body>
 </html>
