@@ -67,59 +67,78 @@ function renderGallery() {
         if (url) document.getElementById(`icon-${p.id}`).innerHTML = `<img src="${url}" class="w-10 h-10 rounded-xl">`;
     });
 }
-
 async function viewPackage(id, pushHistory = true) {
     const p = allPackages.find(x => x.id === id);
     if (!p) return;
     if (pushHistory) history.pushState({}, '', `?id=${id}`);
 
     const latest = p.versions[0];
-    document.getElementById('details-content').innerHTML = `
+    const detailsContainer = document.getElementById('details-content');
+    if (!detailsContainer) return;
+
+    detailsContainer.innerHTML = `
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 bg-white p-8 rounded-2xl border border-slate-200">
+            <div class="lg:col-span-2 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
                 <div class="flex items-center gap-4 mb-6">
-                    <div id="detail-icon">${shortcutGlyphFallback("w-12 h-12 text-azure")}</div>
-                    <div><h1 class="text-3xl font-bold">${p.name}</h1><p class="font-mono text-sm text-slate-400">${p.id}</p></div>
+                    <div id="detail-icon" class="bg-azure/10 p-1 rounded-2xl">
+                        ${shortcutGlyphFallback("w-12 h-12 text-azure")}
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-900">${p.name}</h1>
+                        <p class="font-mono text-sm text-slate-400">${p.id}</p>
+                    </div>
                 </div>
-                <div class="prose prose-slate max-w-none">${marked.parse(p.long_desc)}</div>
+                <div class="prose prose-slate max-w-none">
+                    ${marked.parse(p.long_desc || '*No description provided.*')}
+                </div>
             </div>
             
             <div class="space-y-4">
-                <div class="bg-white p-6 rounded-2xl border-2 border-azure text-center">
-                    <a href="${latest.link}" target="_blank" class="block w-full bg-azure text-white py-3 rounded-xl font-bold mb-2 hover:opacity-90 transition-opacity">Install Latest</a>
-                    <span class="text-xs font-bold text-slate-400 uppercase">Version v${latest.version}</span>
+                <!-- Main CTA for latest version -->
+                <div class="bg-white p-6 rounded-2xl border-2 border-azure text-center shadow-lg shadow-azure/5">
+                    <a href="${latest.link}" target="_blank" class="block w-full bg-azure text-white py-3 rounded-xl font-bold mb-2 hover:bg-blue-600 transition-all">Install Latest</a>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Version v${latest.version}</span>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl border border-slate-200">
+                <!-- Version History with individual links -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-widest">Version History</h3>
-                    <div class="space-y-6">
+                    <div class="space-y-5">
                         ${p.versions.map(v => `
-                            <div class="relative pl-4 border-l-2 border-slate-100 group">
-                                <div class="flex justify-between items-start mb-1">
-                                    <strong class="text-sm text-slate-900">v${v.version}</strong>
-                                    <a href="${v.link}" target="_blank" title="Install v${v.version}" class="text-azure hover:text-blue-700 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            <div class="relative pl-4 border-l-2 border-slate-100 py-1">
+                                <div class="flex justify-between items-center mb-1">
+                                    <strong class="text-sm text-slate-800">v${v.version}</strong>
+                                    <!-- The individual install button -->
+                                    <a href="${v.link}" target="_blank" class="flex items-center gap-1.5 text-azure hover:text-blue-700 bg-azure/5 hover:bg-azure/10 px-2 py-1 rounded-md transition-all">
+                                        <span class="text-[10px] font-bold uppercase">Link</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                         </svg>
                                     </a>
                                 </div>
-                                <p class="text-slate-500 text-xs leading-relaxed">${v.notes || 'No release notes.'}</p>
+                                <p class="text-slate-500 text-xs leading-relaxed pr-2">${v.notes || 'No notes.'}</p>
                             </div>
                         `).join('')}
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 gap-2 pt-2">
-                    <button onclick="prepareUpdate('${p.id}', 'update')" class="w-full py-3 bg-azure/5 text-azure font-bold rounded-xl border border-azure/20 text-xs uppercase hover:bg-azure/10 transition-colors">New Version</button>
+                    <button onclick="prepareUpdate('${p.id}', 'update')" class="w-full py-3 bg-azure/5 text-azure font-bold rounded-xl border border-azure/20 text-xs uppercase hover:bg-azure/10 transition-colors">Push New Version</button>
                     <button onclick="prepareUpdate('${p.id}', 'edit')" class="w-full py-3 text-slate-400 font-bold rounded-xl border border-dashed border-slate-200 text-xs uppercase hover:bg-slate-50 transition-colors">Edit Metadata</button>
                 </div>
             </div>
         </div>
     `;
     
-    // Icon loading logic remains the same
+    // Attempt to load the high-res iCloud icon
     const icon = await getShortcutIcon(latest.link);
-    if (icon) document.getElementById('detail-icon').innerHTML = `<img src="${icon}" class="w-12 h-12 rounded-xl">`;
+    if (icon) {
+        const iconDiv = document.getElementById('detail-icon');
+        if (iconDiv) {
+            iconDiv.innerHTML = `<img src="${icon}" class="w-12 h-12 rounded-xl shadow-sm">`;
+            iconDiv.classList.remove('p-1', 'bg-azure/10');
+        }
+    }
     showPage('details', false);
 }
 
